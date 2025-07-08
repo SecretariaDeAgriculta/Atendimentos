@@ -118,13 +118,13 @@ export function AttendanceSheet() {
         </CardHeader>
         <h2 className="print-show print-title">{title}</h2>
         <CardContent className="p-0 sm:p-6 sm:pt-0">
-          <div className="overflow-x-auto print-table">
+          <div className="overflow-x-auto print-table border-t">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[120px]">Data</TableHead>
-                  <TableHead>Atendimento Presencial</TableHead>
-                  <TableHead>Atendimento Telefone</TableHead>
+                  <TableHead className="w-[120px] border-r">Data</TableHead>
+                  <TableHead className="border-r">Atendimento Presencial</TableHead>
+                  <TableHead className="border-r">Atendimento Telefone</TableHead>
                   <TableHead>Atendimento WhatsApp</TableHead>
                 </TableRow>
               </TableHeader>
@@ -133,11 +133,11 @@ export function AttendanceSheet() {
                   const dayOfWeek = getDay(dayData.date);
                   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                   return (
-                    <TableRow key={index} className={cn(isWeekend && 'bg-muted/50')}>
-                      <TableCell className="font-medium whitespace-nowrap date-cell">
+                    <TableRow key={index} className={cn(isWeekend && 'bg-muted')}>
+                      <TableCell className="font-medium whitespace-nowrap date-cell border-r">
                         {format(dayData.date, 'dd/MMM', { locale: ptBR })}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="border-r">
                         <div className="print-hidden">
                             <CounterInput
                             value={dayData.presencial}
@@ -147,7 +147,7 @@ export function AttendanceSheet() {
                         </div>
                         <span className="print-show">{dayData.presencial}</span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="border-r">
                         <div className="print-hidden">
                             <CounterInput
                             value={dayData.telefone}
