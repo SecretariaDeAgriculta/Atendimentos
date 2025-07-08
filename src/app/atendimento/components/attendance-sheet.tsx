@@ -370,46 +370,55 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
                               locale: ptBR,
                             })}
                           </TableCell>
-                          <TableCell className="border-r">
+                          <TableCell className="border-r text-center align-middle">
                             <div className="print-hidden">
-                              <CounterInput
-                                value={dayData.presencial}
-                                onChange={(v) =>
-                                  handleDataChange(index, 'presencial', v)
-                                }
-                                disabled={isWeekend}
-                              />
+                              {isWeekend ? (
+                                '-'
+                              ) : (
+                                <CounterInput
+                                  value={dayData.presencial}
+                                  onChange={(v) =>
+                                    handleDataChange(index, 'presencial', v)
+                                  }
+                                />
+                              )}
                             </div>
                             <span className="print-show">
-                              {dayData.presencial}
+                              {isWeekend ? '-' : dayData.presencial}
                             </span>
                           </TableCell>
-                          <TableCell className="border-r">
+                          <TableCell className="border-r text-center align-middle">
                             <div className="print-hidden">
-                              <CounterInput
-                                value={dayData.telefone}
-                                onChange={(v) =>
-                                  handleDataChange(index, 'telefone', v)
-                                }
-                                disabled={isWeekend}
-                              />
+                              {isWeekend ? (
+                                '-'
+                              ) : (
+                                <CounterInput
+                                  value={dayData.telefone}
+                                  onChange={(v) =>
+                                    handleDataChange(index, 'telefone', v)
+                                  }
+                                />
+                              )}
                             </div>
                             <span className="print-show">
-                              {dayData.telefone}
+                              {isWeekend ? '-' : dayData.telefone}
                             </span>
                           </TableCell>
-                          <TableCell>
-                            <div className="print-hidden">
-                              <CounterInput
-                                value={dayData.whatsapp}
-                                onChange={(v) =>
-                                  handleDataChange(index, 'whatsapp', v)
-                                }
-                                disabled={isWeekend}
-                              />
+                          <TableCell className="text-center align-middle">
+                             <div className="print-hidden">
+                              {isWeekend ? (
+                                '-'
+                              ) : (
+                                <CounterInput
+                                  value={dayData.whatsapp}
+                                  onChange={(v) =>
+                                    handleDataChange(index, 'whatsapp', v)
+                                  }
+                                />
+                              )}
                             </div>
                             <span className="print-show">
-                              {dayData.whatsapp}
+                              {isWeekend ? '-' : dayData.whatsapp}
                             </span>
                           </TableCell>
                         </TableRow>
