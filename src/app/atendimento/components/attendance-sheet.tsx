@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -34,6 +34,7 @@ import { ptBR } from 'date-fns/locale';
 import { Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@supabase/supabase-js';
+import { Input } from '@/components/ui/input';
 
 type AtendimentoData = {
   date: Date;
@@ -51,21 +52,25 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => ({
   label: new Date(2000, i).toLocaleString('pt-BR', { month: 'long' }),
 }));
 
-const getYears = () => {
-  const currentYear = new Date().getFullYear();
-  return Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
-};
-
 export function AttendanceSheet({ user }: AttendanceSheetProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const getInitialDate = () => {
+    const date = new Date();
+    date.setFullYear(2025);
+    return date;
+  };
+
+  const [currentDate, setCurrentDate] = useState(getInitialDate);
   const [data, setData] = useState<AtendimentoData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const selectedMonth = currentDate.getMonth();
   const selectedYear = currentDate.getFullYear();
+  const [yearInput, setYearInput] = useState(String(selectedYear));
 
-  const years = useMemo(() => getYears(), []);
+  useEffect(() => {
+    setYearInput(String(currentDate.getFullYear()));
+  }, [currentDate]);
 
   const fetchAndSetData = useCallback(async () => {
     if (!user) return;
@@ -124,8 +129,38 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
     setCurrentDate(new Date(selectedYear, parseInt(monthValue, 10), 1));
   };
 
-  const handleYearChange = (yearValue: string) => {
-    setCurrentDate(new Date(parseInt(yearValue, 10), selectedMonth, 1));
+  const handleYearInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setYearInput(value);
+  };
+
+  const updateYear = () => {
+    const year = parseInt(yearInput, 10);
+    if (yearInput.length === 4 && !isNaN(year) && year > 1900 && year < 2100) {
+      setCurrentDate(new Date(year, selectedMonth, 1));
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Ano inválido',
+        description: 'Por favor, insira um ano com 4 dígitos.',
+      });
+      setYearInput(String(selectedYear)); // Revert to last valid year
+    }
+  };
+
+  const handleYearInputBlur = () => {
+    if (yearInput !== String(selectedYear)) {
+      updateYear();
+    }
+  };
+
+  const handleYearInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (yearInput !== String(selectedYear)) {
+        updateYear();
+      }
+      e.currentTarget.blur();
+    }
   };
 
   const handleDataChange = async (
@@ -198,21 +233,18 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
                 ))}
               </SelectContent>
             </Select>
-            <Select
-              value={String(selectedYear)}
-              onValueChange={handleYearChange}
-            >
-              <SelectTrigger className="w-full sm:w-[120px]">
-                <SelectValue placeholder="Ano" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={String(year)}>
-                    {String(year)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={yearInput}
+              onChange={handleYearInputChange}
+              onBlur={handleYearInputBlur}
+              onKeyDown={handleYearInputKeyDown}
+              className="w-full sm:w-[120px]"
+              maxLength={4}
+              placeholder="Ano"
+            />
             <Button onClick={handlePrint} variant="outline" className="ml-auto">
               <Printer className="mr-2 h-4 w-4" />
               Imprimir
