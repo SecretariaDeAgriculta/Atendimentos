@@ -64,6 +64,13 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
   const [data, setData] = useState<AtendimentoData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const [employeeName, setEmployeeName] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setEmployeeName(user.user_metadata.full_name || user.email || '');
+    }
+  }, [user]);
 
   const selectedMonth = currentDate.getMonth();
   const selectedYear = currentDate.getFullYear();
@@ -164,6 +171,47 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
     }
   };
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmployeeName(e.target.value);
+  };
+  
+  const updateUserName = async () => {
+    const currentName = user?.user_metadata?.full_name || user?.email || '';
+    if (employeeName === currentName || !employeeName.trim()) {
+      if (!employeeName.trim()) setEmployeeName(currentName);
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      data: { full_name: employeeName },
+    });
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao atualizar nome',
+        description: error.message,
+      });
+      setEmployeeName(currentName);
+    } else {
+      toast({
+        title: 'Sucesso!',
+        description: 'Nome do funcionário atualizado.',
+      });
+    }
+  };
+
+  const handleNameInputBlur = () => {
+    updateUserName();
+  };
+
+  const handleNameInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      updateUserName();
+      e.currentTarget.blur();
+    }
+  };
+
   const handleDataChange = async (
     index: number,
     field: keyof Omit<AtendimentoData, 'date'>,
@@ -220,9 +268,23 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
     <div className="container mx-auto p-4 md:p-8 print-container">
       <Card className="print-card">
         <CardHeader className="flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between print-hidden">
-          <CardTitle className="text-xl md:text-2xl whitespace-nowrap font-headline">
-            {title}
-          </CardTitle>
+          <div className="flex-grow">
+            <CardTitle className="text-xl md:text-2xl whitespace-nowrap font-headline">
+              {title}
+            </CardTitle>
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t">
+              <strong className="text-sm font-medium whitespace-nowrap">Funcionário:</strong>
+              <Input
+                  type="text"
+                  value={employeeName}
+                  onChange={handleNameChange}
+                  onBlur={handleNameInputBlur}
+                  onKeyDown={handleNameInputKeyDown}
+                  className="h-8"
+                  placeholder="Nome do funcionário"
+              />
+            </div>
+          </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Select
               value={String(selectedMonth)}
@@ -261,6 +323,7 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
           </div>
         </CardHeader>
         <h2 className="print-show print-title">{title}</h2>
+        <p className="print-show text-center text-sm mb-4 -mt-3"><strong>Funcionário:</strong> {employeeName}</p>
         <CardContent className="p-0 sm:p-6 sm:pt-0">
           <div className="overflow-x-auto print-table border-t">
             <Table>
@@ -300,7 +363,7 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
                       return (
                         <TableRow
                           key={index}
-                          className={cn(isWeekend && 'bg-slate-200')}
+                          className={cn(isWeekend && 'bg-slate-300')}
                         >
                           <TableCell className="font-medium whitespace-nowrap date-cell border-r">
                             {format(dayData.date, 'dd/MMM', {
