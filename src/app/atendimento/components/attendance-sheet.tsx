@@ -33,6 +33,7 @@ import {
 import { ptBR } from 'date-fns/locale';
 import { Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { User } from '@supabase/supabase-js';
 
 type AtendimentoData = {
   date: Date;
@@ -40,6 +41,10 @@ type AtendimentoData = {
   telefone: number;
   whatsapp: number;
 };
+
+interface AttendanceSheetProps {
+  user: User;
+}
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => ({
   value: i,
@@ -51,7 +56,7 @@ const getYears = () => {
   return Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
 };
 
-export function AttendanceSheet() {
+export function AttendanceSheet({ user }: AttendanceSheetProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [data, setData] = useState<AtendimentoData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +68,8 @@ export function AttendanceSheet() {
   const years = useMemo(() => getYears(), []);
 
   const fetchAndSetData = useCallback(async () => {
+    if (!user) return;
+
     setLoading(true);
     const daysInMonth = getDaysInMonth(currentDate);
     const year = currentDate.getFullYear();
@@ -74,6 +81,7 @@ export function AttendanceSheet() {
     const { data: supabaseData, error } = await supabase
       .from('attendances')
       .select('*')
+      .eq('user_id', user.id)
       .gte('date', formatISO(startDate, { representation: 'date' }))
       .lte('date', formatISO(endDate, { representation: 'date' }));
 
@@ -106,7 +114,7 @@ export function AttendanceSheet() {
 
     setData(fullMonthData);
     setLoading(false);
-  }, [currentDate, toast]);
+  }, [currentDate, toast, user]);
 
   useEffect(() => {
     fetchAndSetData();
@@ -125,6 +133,7 @@ export function AttendanceSheet() {
     field: keyof Omit<AtendimentoData, 'date'>,
     value: number
   ) => {
+    if (!user) return;
     const originalData = JSON.parse(JSON.stringify(data));
     const newData = [...data];
     newData[index] = { ...newData[index], [field]: value };
@@ -135,11 +144,12 @@ export function AttendanceSheet() {
       presencial: newData[index].presencial,
       telefone: newData[index].telefone,
       whatsapp: newData[index].whatsapp,
+      user_id: user.id,
     };
 
     const { error } = await supabase
       .from('attendances')
-      .upsert(recordToUpsert, { onConflict: 'date' });
+      .upsert(recordToUpsert, { onConflict: 'user_id,date' });
 
     if (error) {
       console.error('Error upserting data:', error);
@@ -249,7 +259,7 @@ export function AttendanceSheet() {
                       return (
                         <TableRow
                           key={index}
-                          className={cn(isWeekend && 'bg-gray-200')}
+                          className={cn(isWeekend && 'bg-gray-300')}
                         >
                           <TableCell className="font-medium whitespace-nowrap date-cell border-r">
                             {format(dayData.date, 'dd/MMM', {
