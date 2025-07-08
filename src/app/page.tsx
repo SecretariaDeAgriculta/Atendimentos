@@ -1,3 +1,9 @@
+import { AttendanceSheet } from '@/app/atendimento/components/attendance-sheet';
+
 export default function Home() {
-  return <></>;
+  return (
+    <main>
+      <AttendanceSheet />
+    </main>
+  );
 }
