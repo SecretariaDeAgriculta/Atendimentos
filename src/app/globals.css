@@ -83,13 +83,31 @@
   }
 }
 
+.print-show {
+    display: none;
+}
+
 @media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
   .print-hidden {
     display: none !important;
+  }
+  .print-show {
+    display: block !important;
+  }
+  .print-title {
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
   }
   .print-container {
     padding: 0 !important;
     margin: 0 !important;
+    width: 100%;
   }
   .print-card {
     border: none !important;
@@ -97,14 +115,20 @@
   }
   .print-table table {
     width: 100% !important;
+    table-layout: fixed;
     border-collapse: collapse !important;
-    font-size: 10pt !important;
+    font-size: 9pt !important;
   }
   .print-table th, .print-table td {
-    border: 1px solid #ccc !important;
-    padding: 6px !important;
+    border: 1px solid #ddd !important;
+    padding: 3px !important;
+    text-align: center;
   }
    .print-table th {
     background-color: #f2f2f2 !important;
+  }
+  .print-table .date-cell {
+      text-align: left !important;
+      padding-left: 6px !important;
   }
 }

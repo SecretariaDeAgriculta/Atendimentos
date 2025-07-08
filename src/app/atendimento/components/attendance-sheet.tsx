@@ -116,6 +116,7 @@ export function AttendanceSheet() {
                 </Button>
             </div>
         </CardHeader>
+        <h2 className="print-show print-title">{title}</h2>
         <CardContent className="p-0 sm:p-6 sm:pt-0">
           <div className="overflow-x-auto print-table">
             <Table>
@@ -133,29 +134,38 @@ export function AttendanceSheet() {
                   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                   return (
                     <TableRow key={index} className={cn(isWeekend && 'bg-muted/50')}>
-                      <TableCell className="font-medium whitespace-nowrap">
+                      <TableCell className="font-medium whitespace-nowrap date-cell">
                         {format(dayData.date, 'dd/MMM', { locale: ptBR })}
                       </TableCell>
                       <TableCell>
-                        <CounterInput
-                          value={dayData.presencial}
-                          onChange={(v) => handleDataChange(index, 'presencial', v)}
-                          disabled={isWeekend}
-                        />
+                        <div className="print-hidden">
+                            <CounterInput
+                            value={dayData.presencial}
+                            onChange={(v) => handleDataChange(index, 'presencial', v)}
+                            disabled={isWeekend}
+                            />
+                        </div>
+                        <span className="print-show">{dayData.presencial}</span>
                       </TableCell>
                       <TableCell>
-                        <CounterInput
-                          value={dayData.telefone}
-                          onChange={(v) => handleDataChange(index, 'telefone', v)}
-                          disabled={isWeekend}
-                        />
+                        <div className="print-hidden">
+                            <CounterInput
+                            value={dayData.telefone}
+                            onChange={(v) => handleDataChange(index, 'telefone', v)}
+                            disabled={isWeekend}
+                            />
+                        </div>
+                        <span className="print-show">{dayData.telefone}</span>
                       </TableCell>
                       <TableCell>
-                        <CounterInput
-                          value={dayData.whatsapp}
-                          onChange={(v) => handleDataChange(index, 'whatsapp', v)}
-                          disabled={isWeekend}
-                        />
+                        <div className="print-hidden">
+                            <CounterInput
+                            value={dayData.whatsapp}
+                            onChange={(v) => handleDataChange(index, 'whatsapp', v)}
+                            disabled={isWeekend}
+                            />
+                        </div>
+                        <span className="print-show">{dayData.whatsapp}</span>
                       </TableCell>
                     </TableRow>
                   );
