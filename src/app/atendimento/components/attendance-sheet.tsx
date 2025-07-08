@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -10,6 +10,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
+  TableFooter,
 } from '@/components/ui/table';
 import {
   Select,
@@ -201,6 +202,14 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
     window.print();
   };
 
+  const totals = useMemo(() => {
+    const presencial = data.reduce((acc, curr) => acc + (curr.presencial || 0), 0);
+    const telefone = data.reduce((acc, curr) => acc + (curr.telefone || 0), 0);
+    const whatsapp = data.reduce((acc, curr) => acc + (curr.whatsapp || 0), 0);
+    const geral = presencial + telefone + whatsapp;
+    return { presencial, telefone, whatsapp, geral };
+  }, [data]);
+
   const title = `ATENDIMENTOS - ${format(
     currentDate,
     'MMMM / yyyy',
@@ -291,7 +300,7 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
                       return (
                         <TableRow
                           key={index}
-                          className={cn(isWeekend && 'bg-gray-300')}
+                          className={cn(isWeekend && 'bg-slate-200')}
                         >
                           <TableCell className="font-medium whitespace-nowrap date-cell border-r">
                             {format(dayData.date, 'dd/MMM', {
@@ -344,6 +353,18 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
                       );
                     })}
               </TableBody>
+              <TableFooter>
+                <TableRow className="bg-slate-100 font-medium hover:bg-slate-100/80">
+                  <TableCell className="border-r font-bold">Total</TableCell>
+                  <TableCell className="text-center font-bold border-r">{totals.presencial}</TableCell>
+                  <TableCell className="text-center font-bold border-r">{totals.telefone}</TableCell>
+                  <TableCell className="text-center font-bold">{totals.whatsapp}</TableCell>
+                </TableRow>
+                <TableRow className="bg-slate-200 font-medium hover:bg-slate-200/80">
+                  <TableCell className="border-r font-bold">Total Geral</TableCell>
+                  <TableCell colSpan={3} className="text-center font-bold">{totals.geral}</TableCell>
+                </TableRow>
+              </TableFooter>
             </Table>
           </div>
         </CardContent>
