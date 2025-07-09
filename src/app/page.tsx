@@ -14,38 +14,18 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.replace('/login');
-        return;
-      }
-      
-      const currentUser = session.user;
-      setUser(currentUser);
-      
-      if (currentUser?.user_metadata?.requires_password_change) {
-          router.replace('/reset-password');
-      } else {
-          setLoading(false);
-      }
-    };
-
-    getSession();
-    
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        if (!session) {
-            router.replace('/login');
+        if (session) {
+          const currentUser = session.user;
+          setUser(currentUser);
+          if (currentUser?.user_metadata?.requires_password_change) {
+            router.replace('/reset-password');
+          } else {
+            setLoading(false);
+          }
         } else {
-            const currentUser = session.user;
-            setUser(currentUser);
-            if (currentUser?.user_metadata?.requires_password_change) {
-                router.replace('/reset-password');
-            } else {
-                setLoading(false);
-            }
+          router.replace('/login');
         }
       }
     );
