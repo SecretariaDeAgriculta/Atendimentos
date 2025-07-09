@@ -30,6 +30,8 @@ import {
   startOfMonth,
   endOfMonth,
   formatISO,
+  isSameDay,
+  subDays,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Printer } from 'lucide-react';
@@ -71,6 +73,45 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
       setEmployeeName(user.user_metadata.full_name || user.email || '');
     }
   }, [user]);
+
+  useEffect(() => {
+    const today = new Date();
+
+    const getLastBusinessDay = (date: Date): Date => {
+      const lastDayOfMonth = endOfMonth(date);
+      const dayOfWeek = getDay(lastDayOfMonth); // Sunday: 0, Saturday: 6
+
+      if (dayOfWeek === 6) {
+        // Saturday
+        return subDays(lastDayOfMonth, 1);
+      }
+      if (dayOfWeek === 0) {
+        // Sunday
+        return subDays(lastDayOfMonth, 2);
+      }
+      return lastDayOfMonth;
+    };
+
+    const lastBusinessDay = getLastBusinessDay(today);
+    const reminderKey = `print-reminder-${format(today, 'yyyy-MM')}`;
+
+    try {
+      const hasBeenShown = sessionStorage.getItem(reminderKey);
+
+      if (isSameDay(today, lastBusinessDay) && !hasBeenShown) {
+        setTimeout(() => {
+          toast({
+            title: 'Lembrete de Impressão',
+            description:
+              'Hoje é o último dia útil do mês. Não se esqueça de imprimir a folha de atendimentos.',
+          });
+          sessionStorage.setItem(reminderKey, 'true');
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Could not access sessionStorage:', error);
+    }
+  }, [toast]);
 
   const selectedMonth = currentDate.getMonth();
   const selectedYear = currentDate.getFullYear();
@@ -174,7 +215,7 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmployeeName(e.target.value);
   };
-  
+
   const updateUserName = async () => {
     const currentName = user?.user_metadata?.full_name || user?.email || '';
     if (employeeName === currentName || !employeeName.trim()) {
@@ -251,7 +292,10 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
   };
 
   const totals = useMemo(() => {
-    const presencial = data.reduce((acc, curr) => acc + (curr.presencial || 0), 0);
+    const presencial = data.reduce(
+      (acc, curr) => acc + (curr.presencial || 0),
+      0
+    );
     const telefone = data.reduce((acc, curr) => acc + (curr.telefone || 0), 0);
     const whatsapp = data.reduce((acc, curr) => acc + (curr.whatsapp || 0), 0);
     const geral = presencial + telefone + whatsapp;
@@ -273,15 +317,17 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
               {title}
             </CardTitle>
             <div className="flex items-center gap-2 mt-2 pt-2 border-t">
-              <strong className="text-sm font-medium whitespace-nowrap">Funcionário:</strong>
+              <strong className="text-sm font-medium whitespace-nowrap">
+                Funcionário:
+              </strong>
               <Input
-                  type="text"
-                  value={employeeName}
-                  onChange={handleNameChange}
-                  onBlur={handleNameInputBlur}
-                  onKeyDown={handleNameInputKeyDown}
-                  className="h-8"
-                  placeholder="Nome do funcionário"
+                type="text"
+                value={employeeName}
+                onChange={handleNameChange}
+                onBlur={handleNameInputBlur}
+                onKeyDown={handleNameInputKeyDown}
+                className="h-8"
+                placeholder="Nome do funcionário"
               />
             </div>
           </div>
@@ -295,10 +341,7 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
               </SelectTrigger>
               <SelectContent>
                 {MONTHS.map((month) => (
-                  <SelectItem
-                    key={month.value}
-                    value={String(month.value)}
-                  >
+                  <SelectItem key={month.value} value={String(month.value)}>
                     {month.label.charAt(0).toUpperCase() + month.label.slice(1)}
                   </SelectItem>
                 ))}
@@ -323,7 +366,9 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
           </div>
         </CardHeader>
         <h2 className="print-show print-title">{title}</h2>
-        <p className="print-show text-center text-sm mb-4 -mt-3"><strong>Funcionário:</strong> {employeeName}</p>
+        <p className="print-show text-center text-sm mb-4 -mt-3">
+          <strong>Funcionário:</strong> {employeeName}
+        </p>
         <CardContent className="p-0 sm:p-6 sm:pt-0">
           <div className="overflow-x-auto print-table border-t">
             <Table>
@@ -338,7 +383,9 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
                   <TableHead className="border-r font-bold text-foreground">
                     Atendimento Telefone
                   </TableHead>
-                  <TableHead className="font-bold text-foreground">Atendimento WhatsApp</TableHead>
+                  <TableHead className="font-bold text-foreground">
+                    Atendimento WhatsApp
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -407,7 +454,7 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
                             </span>
                           </TableCell>
                           <TableCell className="text-center align-middle">
-                             <div className="print-hidden">
+                            <div className="print-hidden">
                               {isWeekend ? (
                                 '-'
                               ) : (
@@ -430,13 +477,23 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
               <TableFooter>
                 <TableRow className="bg-slate-100 font-medium hover:bg-slate-100/80">
                   <TableCell className="border-r font-bold">Total</TableCell>
-                  <TableCell className="text-center font-bold border-r">{totals.presencial}</TableCell>
-                  <TableCell className="text-center font-bold border-r">{totals.telefone}</TableCell>
-                  <TableCell className="text-center font-bold">{totals.whatsapp}</TableCell>
+                  <TableCell className="text-center font-bold border-r">
+                    {totals.presencial}
+                  </TableCell>
+                  <TableCell className="text-center font-bold border-r">
+                    {totals.telefone}
+                  </TableCell>
+                  <TableCell className="text-center font-bold">
+                    {totals.whatsapp}
+                  </TableCell>
                 </TableRow>
                 <TableRow className="bg-slate-200 font-medium hover:bg-slate-200/80">
-                  <TableCell className="border-r font-bold">Total Geral</TableCell>
-                  <TableCell colSpan={3} className="text-center font-bold">{totals.geral}</TableCell>
+                  <TableCell className="border-r font-bold">
+                    Total Geral
+                  </TableCell>
+                  <TableCell colSpan={3} className="text-center font-bold">
+                    {totals.geral}
+                  </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
