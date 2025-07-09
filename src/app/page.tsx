@@ -73,7 +73,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col min-h-screen">
+    <main className="flex flex-col min-h-screen print:min-h-0">
       <div className="absolute top-4 right-4 print-hidden">
         <Button onClick={handleLogout} variant="outline">Sair</Button>
       </div>
