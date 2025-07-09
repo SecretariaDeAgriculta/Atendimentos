@@ -56,13 +56,7 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export function AttendanceSheet({ user }: AttendanceSheetProps) {
-  const getInitialDate = () => {
-    const date = new Date();
-    date.setFullYear(2025);
-    return date;
-  };
-
-  const [currentDate, setCurrentDate] = useState(getInitialDate);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [data, setData] = useState<AtendimentoData[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
