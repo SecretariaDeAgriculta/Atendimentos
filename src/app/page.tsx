@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import type { User } from '@supabase/supabase-js';
 import { AttendanceSheet } from '@/app/atendimento/components/attendance-sheet';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Github, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
@@ -73,11 +73,35 @@ export default function Home() {
   }
 
   return (
-    <main>
+    <main className="flex flex-col min-h-screen">
       <div className="absolute top-4 right-4 print-hidden">
         <Button onClick={handleLogout} variant="outline">Sair</Button>
       </div>
-      <AttendanceSheet user={user} />
+      <div className="flex-grow">
+        <AttendanceSheet user={user} />
+      </div>
+      <footer className="py-4 text-center text-sm text-muted-foreground print-hidden">
+        Desenvolvido com{' '}
+        <a
+          href="https://firebase.google.com/studio"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Firebase Studio"
+          className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+        >
+          <Flame className="h-4 w-4 text-[hsl(var(--chart-1))]" />
+        </a>
+        {' '}por{' '}
+        <a
+          href="https://joaogustavovieiraboaventura.github.io/curriculo/"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Currículo de João Gustavo no GitHub"
+          className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+        >
+          <Github className="h-4 w-4" />
+        </a>
+      </footer>
     </main>
   );
 }
