@@ -329,14 +329,16 @@ export function AttendanceSheet({ user }: AttendanceSheetProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[120px] border-r">Data</TableHead>
-                  <TableHead className="border-r">
+                  <TableHead className="w-[120px] border-r font-bold text-foreground">
+                    Data
+                  </TableHead>
+                  <TableHead className="border-r font-bold text-foreground">
                     Atendimento Presencial
                   </TableHead>
-                  <TableHead className="border-r">
+                  <TableHead className="border-r font-bold text-foreground">
                     Atendimento Telefone
                   </TableHead>
-                  <TableHead>Atendimento WhatsApp</TableHead>
+                  <TableHead className="font-bold text-foreground">Atendimento WhatsApp</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
